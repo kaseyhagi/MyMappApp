@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MyMappApp</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="firstButton">Pin Current Location</string>
+</resources>
