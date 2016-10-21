@@ -103,7 +103,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
     public void onHome(View view){
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, GoogleSearchIntentActivity.class);
         startActivity(intent);
     }
 
