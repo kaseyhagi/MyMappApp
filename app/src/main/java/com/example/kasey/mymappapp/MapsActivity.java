@@ -9,24 +9,30 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
-import android.widget.Button;
+//import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.location.LocationListener;
 
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.SphericalUtil;
+
 import android.support.annotation.NonNull;
 
 
@@ -85,6 +91,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
     }
+//// Creates bounds of a radius based on a center
+//    public LatLngBounds toBounds(LatLng center, double radius) {
+//        LatLng southwest = SphericalUtil.computeOffset(center, radius * Math.sqrt(2.0), 225);
+//        LatLng northeast = SphericalUtil.computeOffset(center, radius * Math.sqrt(2.0), 45);
+//        return new LatLngBounds(southwest, northeast);
+//    }
 
     public void onAddCurrentLocationClick(View view) {
         //adds a marker at sydney
@@ -97,14 +109,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onSearch(View view) {
         String searchEntry = this.searchBar.getText().toString();
         if(!searchEntry.isEmpty()){
-            Intent intent = new Intent(this, SearchActivity.class);
+            Intent intent = new Intent(this, GoogleSearchIntentActivity.class);
             intent.putExtra("search", searchEntry);
+//            intent.putExtra("currentLat", mLastLocation.getLatitude());      /* use when mLastLocation works*/
+//            intent.putExtra("currentLong", mLastLocation.getLongitude());
+            intent.putExtra("currentLat",21.3972);
+            intent.putExtra("currentLong",-157.9745 );
             startActivity(intent);
         }
     }
     public void onHome(View view){
-        Intent intent = new Intent(this, GoogleSearchIntentActivity.class);
-        startActivity(intent);
+//        mCurrLocationMarker.setVisible(true);
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(mLastLocation));
+    }
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
     }
 
     /**
@@ -182,22 +207,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
     }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(1000);
-        mLocationRequest.setFastestInterval(1000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        if (ContextCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        }
-
-
-    }
+//
+//    @Override
+//    public void onConnected(Bundle bundle) {
+//
+//        mLocationRequest = new LocationRequest();
+//        mLocationRequest.setInterval(1000);
+//        mLocationRequest.setFastestInterval(1000);
+//        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+//        if (ContextCompat.checkSelfPermission(this,
+//                android.Manifest.permission.ACCESS_FINE_LOCATION)
+//                == PackageManager.PERMISSION_GRANTED) {
+//            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+//        }
+//
+//
+//    }
+@Override
+public void onConnected(Bundle connectionHint) {
+    mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+            mGoogleApiClient);
+//    if (mLastLocation != null) {
+//        mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
+//        mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
+//    }
+}
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -271,5 +305,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // other 'case' lines to check for other permissions this app might request.
             // You can add here other case statements according to your requirement.
         }
+    }
+
+
+    protected void createLocationRequest() {
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient,
+                        builder.build());
     }
 }
