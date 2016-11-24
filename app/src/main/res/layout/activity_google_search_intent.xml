@@ -8,13 +8,29 @@ android:layout_height="fill_parent"
 android:orientation="vertical"
 android:padding="10dp"
 tools:context="com.example.kasey.mymappapp.GoogleSearchIntentActivity">
-
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:hint="Search"
+            android:id="@+id/search_bar"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Search"
+            android:id="@+id/search_button"
+            android:onClick="onSearch"/>
+    </LinearLayout>
+    <ListView
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/addressLayout"
+        android:id="@+id/addressListView"
         android:orientation="vertical">
 
-    </LinearLayout>
+    </ListView>
 
 </LinearLayout>

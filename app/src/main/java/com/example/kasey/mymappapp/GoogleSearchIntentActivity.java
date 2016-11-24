@@ -8,11 +8,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -24,7 +28,11 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
 
     LatLng currentLatLng;
     private String searchField;
-    protected LinearLayout addressLinearLayout;
+    protected ListView addressListView;
+    private List<Address> addressList;
+    // Search bar EditText view
+    protected EditText searchFieldEditText;
+    protected ListAdapter addressAdapter;
 
 
     /**
@@ -35,38 +43,59 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_search_intent);
 
+        // Getting search fields from previous activity through intent
         Intent intent = getIntent();
-
         searchField = intent.getExtras().getString("search");
         double lat = intent.getExtras().getDouble("currentLat");
         double lng = intent.getExtras().getDouble("currentLong");
         currentLatLng = new LatLng(lat, lng);
-        addressLinearLayout = (LinearLayout) findViewById(R.id.addressLayout);
+
+        initLayout();
+    }
+    public void initLayout(){
+
         try {
-            onSearch();
+            onNewSearch();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Address[] addressArray = {addressList.get(0),addressList.get(1),addressList.get(2), addressList.get(3)};
+        addressAdapter = new AddressListAdapter(this, addressArray);
+        addressListView = (ListView)findViewById(R.id.addressListView);
+        addressListView.setAdapter(addressAdapter);
+        addressListView.setOnItemClickListener(new
+                                                       AdapterView.OnItemClickListener() {
+                                                           @Override
+                                                           public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                                               String picked = "You selected" + String.valueOf(parent.getItemAtPosition(position));
+                                                               Toast.makeText(GoogleSearchIntentActivity.this, picked, Toast.LENGTH_SHORT).show();
+                                                           }
+                                                       });
+        searchFieldEditText = (EditText) findViewById(R.id.search_bar);
+        searchFieldEditText.setHint(searchField);
     }
-
-    public void onSearch() throws IOException {
+    public void onSearch(View view) throws IOException {
+        searchField = searchFieldEditText.getText().toString();
+        initLayout();
+    }
+    public void onNewSearch() throws IOException {
 
         LatLngBounds currentBounds = toBounds(currentLatLng, 50);
         searchField = searchField.trim();
-        List<Address> addressList = null;
+        addressList = null;
 
         Geocoder geocoder = new Geocoder(this);
         try {
             // add location to addressList
             addressList = geocoder.getFromLocationName(searchField,
-                    3,
+                    4 /* number of search results*/,
                     currentBounds.southwest.latitude,
                     currentBounds.southwest.longitude,
                     currentBounds.northeast.latitude,
                     currentBounds.northeast.longitude);
-            this.addToList(addressList.get(0));
-            this.addToList(addressList.get(1));
-            this.addToList(addressList.get(2));
+//            this.addToList(addressList.get(0));
+//            this.addToList(addressList.get(1));
+//            this.addToList(addressList.get(2));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -95,24 +124,24 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
         return new LatLngBounds(southwest, northeast);
     }
 
-    public void addToList(Address address) {
-        ViewGroup.LayoutParams lparams = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        TextView tv = new TextView(this);
-        tv.setLayoutParams(lparams);
-        tv.setText(searchField);
-        this.addressLinearLayout.addView(tv);
-
-        // line 2
-        TextView tv1 = new TextView(this);
-        tv1.setLayoutParams(lparams);
-        tv1.setText(address.getAddressLine(0));
-        this.addressLinearLayout.addView(tv1);
-//line 3
-        TextView tv2 = new TextView(this);
-        tv2.setLayoutParams(lparams);
-        tv2.setText(address.getAddressLine(1));
-        this.addressLinearLayout.addView(tv2);
-
-    }
+//    public void addToList(Address address) {
+//        ViewGroup.LayoutParams lparams = new ViewGroup.LayoutParams(
+//                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//        TextView tv = new TextView(this);
+//        tv.setLayoutParams(lparams);
+//        tv.setText(searchField);
+//        this.addressLinearLayout.addView(tv);
+//
+//        // line 2
+//        TextView tv1 = new TextView(this);
+//        tv1.setLayoutParams(lparams);
+//        tv1.setText(address.getAddressLine(0));
+//        this.addressLinearLayout.addView(tv1);
+////line 3
+//        TextView tv2 = new TextView(this);
+//        tv2.setLayoutParams(lparams);
+//        tv2.setText(address.getAddressLine(1));
+//        this.addressLinearLayout.addView(tv2);
+//
+//    }
 }
