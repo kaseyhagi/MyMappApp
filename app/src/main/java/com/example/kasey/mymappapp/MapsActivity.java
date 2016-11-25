@@ -2,15 +2,18 @@ package com.example.kasey.mymappapp;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
 import android.location.Location;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.view.LayoutInflater;
 import android.view.View;
 //import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -84,6 +87,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     intent.getExtras().getDouble("search_LocationLong"));
             newLocationName = intent.getExtras().getString("search_LocationName");
         }
+        else if(intent.getExtras().getBoolean("putLocationByAddress")){
+            newLocation = new LatLng(intent.getExtras().getDouble("addressLat"),
+                    intent.getExtras().getDouble("addressLng"));
+            newLocationName = intent.getExtras().getString("addressName");
+        }
 
         else{
             newLocation=null;
@@ -144,6 +152,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        //Setting up info window
+        if(mMap != null){
+            mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter(){
+                @Override
+                public View getInfoWindow(Marker marker){
+                    return null;
+                }
+                @Override
+                public View getInfoContents(Marker marker){
+                    View infoWindow = getLayoutInflater().inflate(R.layout.info_window, null);
+                    TextView locationName = (TextView)infoWindow.findViewById(R.id.iw_location1);
+                    TextView location2 = (TextView)infoWindow.findViewById(R.id.iw_location2);
+
+                    locationName.setText(marker.getTitle());
+                    location2.setText(marker.getPosition().toString());
+                    return infoWindow;
+                }
+            });
+        }
+        //close setting up info window
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         // Initialize Google Play Services
@@ -163,10 +192,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney)); */
         if(newLocation!= null){
-            mMap.addMarker(new MarkerOptions().position(newLocation).title(newLocationName));
+            Marker searchResultMarker = mMap.addMarker(new MarkerOptions()
+                    .position(newLocation)
+                    .title(newLocationName)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
             mMap.moveCamera(CameraUpdateFactory.newLatLng(newLocation));
             mMap.setMinZoomPreference(15.0f);
             mMap.setMaxZoomPreference(20.0f);
+            searchResultMarker.showInfoWindow();
 
         }
 

@@ -10,12 +10,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 /**
  * Created by Kasey on 11/24/2016.
  */
 
 public class AddressListAdapter extends ArrayAdapter<Address> {
-    AddressListAdapter(Context context, Address[] values){
+    AddressListAdapter(Context context, ArrayList<Address> values){
         super(context, R.layout.address_layout, values);
     }
 
