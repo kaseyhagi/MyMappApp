@@ -20,6 +20,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -36,6 +37,8 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
     // Search bar EditText view
     protected EditText searchFieldEditText;
     protected ListAdapter addressAdapter;
+    protected TextView boundstv;
+
 
 
     /**
@@ -52,6 +55,7 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
         double lat = intent.getExtras().getDouble("currentLat");
         double lng = intent.getExtras().getDouble("currentLong");
         currentLatLng = new LatLng(lat, lng);
+        boundstv = (TextView)findViewById(R.id.bounds);
 
         initLayout();
     }
@@ -86,12 +90,22 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
         searchFieldEditText = (EditText) findViewById(R.id.search_bar);
         searchFieldEditText.setText(searchField);
     }
+
+
+
     public void viewOnMap(Address address){
         Intent intent = new Intent(this, MapsActivity.class);
         intent.putExtra("putLocationByAddress", true);
         intent.putExtra("addressName", address.getAddressLine(0));
         intent.putExtra("addressLat", address.getLatitude());
         intent.putExtra("addressLng", address.getLongitude());
+//        intent.putExtra("latlngBounds", toBounds(currentLatLng, 50));
+        startActivity(intent);
+    }
+    public void toMap(View view){
+        Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra("addresses", addressList);
+        intent.putExtra("multiplePins", true);
         startActivity(intent);
     }
     public void onSearch(View view) throws IOException {
@@ -100,7 +114,7 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
     }
     public void onNewSearch() throws IOException {
 
-        LatLngBounds currentBounds = toBounds(currentLatLng, 50);
+        LatLngBounds currentBounds = toBounds(currentLatLng, 2);
         searchField = searchField.trim();
         addressList = new ArrayList<>();
 
@@ -108,7 +122,7 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
         try {
             // add location to addressList
             List<Address> list1 = geocoder.getFromLocationName(searchField,
-                    4 /* number of search results*/,
+                    6 /* number of search results*/,
                     currentBounds.southwest.latitude,
                     currentBounds.southwest.longitude,
                     currentBounds.northeast.latitude,
@@ -136,7 +150,7 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
         double ne_lng = centerLng + longChange;
         LatLng southwest = new LatLng(sw_lat, sw_lng);
         LatLng northeast = new LatLng(ne_lat, ne_lng);
-
+boundstv.setText("SW: "+ sw_lat+ ", " + sw_lng+ "NE: "+ ne_lat+", "+ ne_lng);
         return new LatLngBounds(southwest, northeast);
     }
 

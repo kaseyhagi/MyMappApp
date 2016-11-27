@@ -38,6 +38,8 @@ import com.google.maps.android.SphericalUtil;
 
 import android.support.annotation.NonNull;
 
+import java.util.ArrayList;
+
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -52,6 +54,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     EditText searchBar;
     LatLng newLocation;
     String newLocationName;
+    ArrayList<Address> addressList;
+    LatLngBounds bounds;
 
 
 
@@ -80,7 +84,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent intent = getIntent();
         //if navigating from "search" then pins to location clicked
         // putLocation is true when navigating from search
-        // putLocation is falsee when navigating from main
+        // putLocation is false when navigating from main
         if(intent.getExtras().getBoolean("putLocation")){
             newLocation = new LatLng(
                     intent.getExtras().getDouble("search_LocationLat"),
@@ -93,27 +97,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             newLocationName = intent.getExtras().getString("addressName");
         }
 
-        else{
-            newLocation=null;
-            newLocationName=null;
+        else if(intent.getExtras().getBoolean("multiplePins")) {
+            addressList =intent.getExtras().getParcelableArrayList("addresses");
+
+        }
+        else {
+                newLocation=null;
+                newLocationName=null;
+         }
         }
 
-    }
-//// Creates bounds of a radius based on a center
-//    public LatLngBounds toBounds(LatLng center, double radius) {
-//        LatLng southwest = SphericalUtil.computeOffset(center, radius * Math.sqrt(2.0), 225);
-//        LatLng northeast = SphericalUtil.computeOffset(center, radius * Math.sqrt(2.0), 45);
-//        return new LatLngBounds(southwest, northeast);
-//    }
 
-    public void onAddCurrentLocationClick(View view) {
-        //adds a marker at sydney
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        //mCurrLocationMarker.setVisible(true);
 
-    }
+
+
+
     public void onSearch(View view) {
         String searchEntry = this.searchBar.getText().toString();
         if(!searchEntry.isEmpty()){
@@ -126,10 +124,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             startActivity(intent);
         }
     }
-    public void onHome(View view){
-//        mCurrLocationMarker.setVisible(true);
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(mLastLocation));
-    }
+
     protected void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
@@ -153,7 +148,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        //Setting up info window
+        //Setting up info window for pins
         if(mMap != null){
             mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter(){
                 @Override
@@ -200,9 +195,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setMinZoomPreference(15.0f);
             mMap.setMaxZoomPreference(20.0f);
             searchResultMarker.showInfoWindow();
+            Toast.makeText(MapsActivity.this, "new location", Toast.LENGTH_SHORT).show();
 
         }
+        createPins();
+//            createBounds();
 
+    }
+    private void createBounds(){
+        //used for debuggin purposes to create pins of the bounds
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(21.3682554, -158.02622019 ))
+                .title("southwest")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(21.42614457,-157.92277980))
+                .title("northeast")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+
+    }
+    /* Create pins from ArrayList<Address>*/
+    private void createPins(){
+        if(addressList!=null){
+            for(int i=0;i<addressList.size();i++){
+                Address address = addressList.get(i);
+                mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(address.getLatitude(),address.getLongitude()))
+                        .title(address.getAddressLine(0))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+
+            }
+            mMap.setMinZoomPreference(11.0f);
+            mMap.setMaxZoomPreference(50.0f);
+//            change numbers in next line to set camera to current location
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(21.3972, -157.9745 )));
+            Toast.makeText(MapsActivity.this, "Created Pins", Toast.LENGTH_SHORT).show();
+
+        }
 
     }
 
@@ -258,8 +287,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //    }
 @Override
 public void onConnected(Bundle connectionHint) {
-    mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-            mGoogleApiClient);
+//    mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+//            mGoogleApiClient);
 //    if (mLastLocation != null) {
 //        mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
 //        mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
