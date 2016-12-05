@@ -48,14 +48,8 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_search_intent);
 
-        // Getting search fields from previous activity through intent
-//        Intent intent = getIntent();
-//        searchField = intent.getExtras().getString("search");
-//        double lat = intent.getExtras().getDouble("currentLat");
-//        double lng = intent.getExtras().getDouble("currentLong");
-//        currentLatLng = new LatLng(lat, lng);
         searchField="";
-        currentLatLng = new LatLng(21.3972, -157.9745);
+        currentLatLng = new LatLng(21.300191, -157.819018);
         initLayout();
 
     }
