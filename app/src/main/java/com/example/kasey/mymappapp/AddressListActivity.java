@@ -1,5 +1,6 @@
 package com.example.kasey.mymappapp;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.location.Address;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,7 @@ public class AddressListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_address_list);
 
-        myAddressList = new ArrayList<>();
+        initList();
         addressListAdapter = new AddressListAdapter(this, myAddressList);
         addressListView = (ListView) findViewById(R.id.addressListView);
         addressListView.setAdapter(addressListAdapter);
@@ -39,10 +41,19 @@ public class AddressListActivity extends AppCompatActivity {
         });
 
 
-
     }
-    public void addAddress(Address address){
-        myAddressList.add(address);
+    protected void initList(){
+        Intent intent = getIntent();
+//        myAddressList = new ArrayList<>();
+//        myAddressList = intent.getExtras().getParcelableArrayList("addresses");
+        this.addAddress((Address) intent.getExtras().getParcelable("address"));
+    }
+
+    public void addAddress(Address a){
+        this.myAddressList.add(a);
+    }
+    public void removeAddress(Address a){
+        this.myAddressList.remove(a);
     }
 
 

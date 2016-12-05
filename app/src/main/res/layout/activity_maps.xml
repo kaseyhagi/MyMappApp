@@ -1,35 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.kasey.mymappapp.MapsActivity"
-    android:id="@+id/mapActivity"
-    android:orientation = "vertical">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <EditText
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:hint="Search"
-            android:id="@+id/map_search_bar"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Search"
-            android:id="@+id/map_search_button"
-            android:onClick="onSearch"/>
-    </LinearLayout>
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/mapActivity"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              tools:context="com.example.kasey.mymappapp.MapsActivity">
+    <!--<LinearLayout-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:orientation="horizontal">-->
+    <!--<EditText-->
+    <!--android:layout_width="0dp"-->
+    <!--android:layout_weight="1"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:hint="Search"-->
+    <!--android:id="@+id/map_search_bar"/>-->
+    <!--<Button-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:text="Search"-->
+    <!--android:id="@+id/map_search_button"-->
+    <!--android:onClick="onSearch"/>-->
+    <!--</LinearLayout>-->
 
     <fragment
+        android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight = "1"
-        android:id="@+id/map"/>
+        android:layout_weight="1"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/map_location_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+        <TextView
+            android:id="@+id/map_address1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+        <TextView
+            android:id="@+id/map_address2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+        <Button
+            android:id="@+id/map_add_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:onClick="onAddLocationClick"
+            android:text="Add"/>
     </LinearLayout>
+
+
+</LinearLayout>

@@ -37,7 +37,6 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
     // Search bar EditText view
     protected EditText searchFieldEditText;
     protected ListAdapter addressAdapter;
-    protected TextView boundstv;
 
 
 
@@ -50,16 +49,19 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_google_search_intent);
 
         // Getting search fields from previous activity through intent
-        Intent intent = getIntent();
-        searchField = intent.getExtras().getString("search");
-        double lat = intent.getExtras().getDouble("currentLat");
-        double lng = intent.getExtras().getDouble("currentLong");
-        currentLatLng = new LatLng(lat, lng);
-        boundstv = (TextView)findViewById(R.id.bounds);
-
+//        Intent intent = getIntent();
+//        searchField = intent.getExtras().getString("search");
+//        double lat = intent.getExtras().getDouble("currentLat");
+//        double lng = intent.getExtras().getDouble("currentLong");
+//        currentLatLng = new LatLng(lat, lng);
+        searchField="";
+        currentLatLng = new LatLng(21.3972, -157.9745);
         initLayout();
+
     }
     public void initLayout(){
+        searchFieldEditText = (EditText) findViewById(R.id.search_bar);
+        searchFieldEditText.setText(searchField);
         /* hiding the keyboard */
         View view = this.getCurrentFocus();
         if (view != null) {
@@ -72,42 +74,39 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        Address[] addressArray = {addressList.get(0),addressList.get(1),addressList.get(2), addressList.get(3)};
-        addressAdapter = new AddressListAdapter(this, addressList);
-        addressListView = (ListView)findViewById(R.id.addressSearchListView);
-        addressListView.setAdapter(addressAdapter);
-        addressListView.setOnItemClickListener(new
-                                                       AdapterView.OnItemClickListener() {
-                                                           @Override
-                                                           public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                                               String picked = "You selected" + String.valueOf(parent.getItemAtPosition(position));
-                                                               Toast.makeText(GoogleSearchIntentActivity.this, picked, Toast.LENGTH_SHORT).show();
-                                                               Address viewAddress = (Address)parent.getItemAtPosition(position);
-                                                               viewOnMap(viewAddress);
+        if(searchField!=""){
+            addressAdapter = new AddressListAdapter(this, addressList);
+            addressListView = (ListView)findViewById(R.id.addressSearchListView);
+            addressListView.setAdapter(addressAdapter);
+            addressListView.setOnItemClickListener(new
+                                                           AdapterView.OnItemClickListener() {
+                                                               @Override
+                                                               public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                                                                   String picked = "You selected" + String.valueOf(parent.getItemAtPosition(position));
+//                                                                   Toast.makeText(GoogleSearchIntentActivity.this, picked, Toast.LENGTH_SHORT).show();
+                                                                   Address viewAddress = (Address)parent.getItemAtPosition(position);
+                                                                   viewOnMap(viewAddress);
 
-                                                           }
-                                                       });
-        searchFieldEditText = (EditText) findViewById(R.id.search_bar);
-        searchFieldEditText.setText(searchField);
+                                                               }
+                                                           });
+
+        }
+
     }
 
 
 
     public void viewOnMap(Address address){
         Intent intent = new Intent(this, MapsActivity.class);
-        intent.putExtra("putLocationByAddress", true);
-        intent.putExtra("addressName", address.getAddressLine(0));
-        intent.putExtra("addressLat", address.getLatitude());
-        intent.putExtra("addressLng", address.getLongitude());
+//        intent.putExtra("putLocationByAddress", true);
+//        intent.putExtra("addressName", address.getAddressLine(0));
+//        intent.putExtra("addressLat", address.getLatitude());
+//        intent.putExtra("addressLng", address.getLongitude());
+        intent.putExtra("address",address);
 //        intent.putExtra("latlngBounds", toBounds(currentLatLng, 50));
         startActivity(intent);
     }
-    public void toMap(View view){
-        Intent intent = new Intent(this, MapsActivity.class);
-        intent.putExtra("addresses", addressList);
-        intent.putExtra("multiplePins", true);
-        startActivity(intent);
-    }
+
     public void onSearch(View view) throws IOException {
         searchField = searchFieldEditText.getText().toString();
         initLayout();
@@ -150,7 +149,6 @@ public class GoogleSearchIntentActivity extends AppCompatActivity {
         double ne_lng = centerLng + longChange;
         LatLng southwest = new LatLng(sw_lat, sw_lng);
         LatLng northeast = new LatLng(ne_lat, ne_lng);
-boundstv.setText("SW: "+ sw_lat+ ", " + sw_lng+ "NE: "+ ne_lat+", "+ ne_lng);
         return new LatLngBounds(southwest, northeast);
     }
 

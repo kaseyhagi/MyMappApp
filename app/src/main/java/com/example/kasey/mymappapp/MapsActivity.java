@@ -1,13 +1,16 @@
 package com.example.kasey.mymappapp;
 
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.icu.text.DateFormat;
 import android.location.Address;
 import android.location.Location;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,12 +22,16 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -36,9 +43,13 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.SphericalUtil;
 
+import com.google.android.gms.common.api.Result;
+
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.jar.*;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
@@ -48,14 +59,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     GoogleApiClient mGoogleApiClient;
-    Location mLastLocation;
-    Marker mCurrLocationMarker;
-    LocationRequest mLocationRequest;
-    EditText searchBar;
+//    Location mLastLocation;
+//    Location mCurrentLocation;
+
+//    Marker mCurrLocationMarker;
+//    LocationRequest mLocationRequest;
+//    EditText searchBar;
     LatLng newLocation;
     String newLocationName;
     ArrayList<Address> addressList;
     LatLngBounds bounds;
+    Address selectedAddress;
+    TextView locationtv;
+    TextView address1tv;
+    TextView address2tv;
+
 
 
 
@@ -71,7 +89,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        searchBar = (EditText)findViewById(R.id.map_search_bar);
+//        searchBar = (EditText)findViewById(R.id.map_search_bar);
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -81,49 +99,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .build();
         }
 
+
         Intent intent = getIntent();
+        selectedAddress = intent.getExtras().getParcelable("address");
+        newLocation = new LatLng(selectedAddress.getLatitude(),selectedAddress.getLongitude());
+        locationtv = (TextView)findViewById(R.id.map_location_name);
+        locationtv.setText(selectedAddress.getAddressLine(0));
+        address1tv = (TextView)findViewById(R.id.map_address1);
+        address1tv.setText(selectedAddress.getAddressLine(1));
+        address2tv = (TextView)findViewById(R.id.map_address2);
+        address2tv.setText(selectedAddress.getAddressLine(2));
+
         //if navigating from "search" then pins to location clicked
         // putLocation is true when navigating from search
         // putLocation is false when navigating from main
-        if(intent.getExtras().getBoolean("putLocation")){
-            newLocation = new LatLng(
-                    intent.getExtras().getDouble("search_LocationLat"),
-                    intent.getExtras().getDouble("search_LocationLong"));
-            newLocationName = intent.getExtras().getString("search_LocationName");
+//        if(intent.getExtras().getBoolean("putLocation")){
+//            newLocation = new LatLng(
+//                    intent.getExtras().getDouble("search_LocationLat"),
+//                    intent.getExtras().getDouble("search_LocationLong"));
+//            newLocationName = intent.getExtras().getString("search_LocationName");
+//        }
+//        if(intent.getExtras().getBoolean("putLocationByAddress")){
+//            newLocation = new LatLng(intent.getExtras().getDouble("addressLat"),
+//                    intent.getExtras().getDouble("addressLng"));
+//            newLocationName = intent.getExtras().getString("addressName");
+//        }
+//
+//        else if(intent.getExtras().getBoolean("multiplePins")) {
+//            addressList =intent.getExtras().getParcelableArrayList("addresses");
+//
+//        }
+//        else {
+//                newLocation=null;
+//                newLocationName=null;
+//         }
         }
-        else if(intent.getExtras().getBoolean("putLocationByAddress")){
-            newLocation = new LatLng(intent.getExtras().getDouble("addressLat"),
-                    intent.getExtras().getDouble("addressLng"));
-            newLocationName = intent.getExtras().getString("addressName");
-        }
 
-        else if(intent.getExtras().getBoolean("multiplePins")) {
-            addressList =intent.getExtras().getParcelableArrayList("addresses");
-
-        }
-        else {
-                newLocation=null;
-                newLocationName=null;
-         }
-        }
-
-
-
-
-
-
-    public void onSearch(View view) {
-        String searchEntry = this.searchBar.getText().toString();
-        if(!searchEntry.isEmpty()){
-            Intent intent = new Intent(this, GoogleSearchIntentActivity.class);
-            intent.putExtra("search", searchEntry);
-//            intent.putExtra("currentLat", mLastLocation.getLatitude());      /* use when mLastLocation works*/
-//            intent.putExtra("currentLong", mLastLocation.getLongitude());
-            intent.putExtra("currentLat",21.3972);
-            intent.putExtra("currentLong",-157.9745 );
-            startActivity(intent);
-        }
+    public void onAddLocationClick(View view) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("address", selectedAddress);
+        startActivity(intent);
     }
+
+
 
     protected void onStart() {
         mGoogleApiClient.connect();
@@ -148,28 +166,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+//        mMap.setOnMyLocationButtonClickListener(this);
+
         //Setting up info window for pins
-        if(mMap != null){
-            mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter(){
-                @Override
-                public View getInfoWindow(Marker marker){
-                    return null;
-                }
-                @Override
-                public View getInfoContents(Marker marker){
-                    View infoWindow = getLayoutInflater().inflate(R.layout.info_window, null);
-                    TextView locationName = (TextView)infoWindow.findViewById(R.id.iw_location1);
-                    TextView location2 = (TextView)infoWindow.findViewById(R.id.iw_location2);
-
-                    locationName.setText(marker.getTitle());
-                    location2.setText(marker.getPosition().toString());
-                    return infoWindow;
-                }
-            });
-        }
+//        if(mMap != null){
+//            mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter(){
+//                @Override
+//                public View getInfoWindow(Marker marker){
+//                    return null;
+//                }
+//                @Override
+//                public View getInfoContents(Marker marker){
+//                    View infoWindow = getLayoutInflater().inflate(R.layout.info_window, null);
+//                    TextView locationName = (TextView)infoWindow.findViewById(R.id.iw_location1);
+//                    TextView location2 = (TextView)infoWindow.findViewById(R.id.iw_location2);
+//
+//                    locationName.setText(marker.getTitle());
+//                    location2.setText(marker.getPosition().toString());
+//                    return infoWindow;
+//                }
+//            });
+//        }
         //close setting up info window
-        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         // Initialize Google Play Services
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this,
@@ -198,42 +218,51 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Toast.makeText(MapsActivity.this, "new location", Toast.LENGTH_SHORT).show();
 
         }
-        createPins();
+//        else pinCurrentLocation();
+//            createPins();
 //            createBounds();
 
-    }
-    private void createBounds(){
-        //used for debuggin purposes to create pins of the bounds
-        mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(21.3682554, -158.02622019 ))
-                .title("southwest")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
-        mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(21.42614457,-157.92277980))
-                .title("northeast")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
 
     }
-    /* Create pins from ArrayList<Address>*/
-    private void createPins(){
-        if(addressList!=null){
-            for(int i=0;i<addressList.size();i++){
-                Address address = addressList.get(i);
-                mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(address.getLatitude(),address.getLongitude()))
-                        .title(address.getAddressLine(0))
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
-
-            }
-            mMap.setMinZoomPreference(11.0f);
-            mMap.setMaxZoomPreference(50.0f);
-//            change numbers in next line to set camera to current location
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(21.3972, -157.9745 )));
-            Toast.makeText(MapsActivity.this, "Created Pins", Toast.LENGTH_SHORT).show();
-
-        }
-
-    }
+//    private void pinCurrentLocation(){
+//
+//        mMap.addMarker(new MarkerOptions()
+//                .position( new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()))
+//                .title("southwest")
+//                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+//    }
+//    private void createBounds(){
+//        //used for debuggin purposes to create pins of the bounds
+//        mMap.addMarker(new MarkerOptions()
+//                .position(new LatLng(21.3682554, -158.02622019 ))
+//                .title("southwest")
+//                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+//        mMap.addMarker(new MarkerOptions()
+//                .position(new LatLng(21.42614457,-157.92277980))
+//                .title("northeast")
+//                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+//
+//    }
+//    /* Create pins from ArrayList<Address>*/
+//    private void createPins(){
+//        if(addressList!=null){
+//            for(int i=0;i<addressList.size();i++){
+//                Address address = addressList.get(i);
+//                mMap.addMarker(new MarkerOptions()
+//                        .position(new LatLng(address.getLatitude(),address.getLongitude()))
+//                        .title(address.getAddressLine(0))
+//                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+//
+//            }
+//            mMap.setMinZoomPreference(11.0f);
+//            mMap.setMaxZoomPreference(50.0f);
+////            change numbers in next line to set camera to current location
+//            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(21.3972, -157.9745 )));
+//            Toast.makeText(MapsActivity.this, "Created Pins", Toast.LENGTH_SHORT).show();
+//
+//        }
+//
+//    }
 
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -247,53 +276,54 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onLocationChanged(Location location) {
 
-        mLastLocation = location;
-        if (mCurrLocationMarker != null) {
-            mCurrLocationMarker.remove();
-        }
-
-        //Place current location marker
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("Current Position");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-        mCurrLocationMarker = mMap.addMarker(markerOptions);
-
-        //move map camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
-
-        //stop location updates
-        if (mGoogleApiClient != null) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        }
+//        mLastLocation = location;
+//        if (mCurrLocationMarker != null) {
+//            mCurrLocationMarker.remove();
+//        }
+//
+//        //Place current location marker
+//        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+//        MarkerOptions markerOptions = new MarkerOptions();
+//        markerOptions.position(latLng);
+//        markerOptions.title("Current Position");
+//        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
+//        mCurrLocationMarker = mMap.addMarker(markerOptions);
+//
+//        //move map camera
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+//        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+//
+//        //stop location updates
+//        if (mGoogleApiClient != null) {
+//            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+//        }
     }
-//
-//    @Override
-//    public void onConnected(Bundle bundle) {
-//
+
+
+    @Override
+    public void onConnected(Bundle bundle) {
+
 //        mLocationRequest = new LocationRequest();
 //        mLocationRequest.setInterval(1000);
 //        mLocationRequest.setFastestInterval(1000);
 //        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+//        createLocationRequest();
 //        if (ContextCompat.checkSelfPermission(this,
 //                android.Manifest.permission.ACCESS_FINE_LOCATION)
 //                == PackageManager.PERMISSION_GRANTED) {
 //            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 //        }
 //
-//
-//    }
-@Override
-public void onConnected(Bundle connectionHint) {
-//    mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-//            mGoogleApiClient);
-//    if (mLastLocation != null) {
-//        mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
-//        mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
-//    }
-}
+//        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+//        if(mLastLocation != null){
+//            mMap.addMarker(new MarkerOptions()
+//                    .position(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()))
+//                    .title("last location")
+//                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+//        }
+
+    }
+
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -375,10 +405,43 @@ public void onConnected(Bundle connectionHint) {
         mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
-        PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient,
-                        builder.build());
+//        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+//                .addLocationRequest(mLocationRequest);
+//        PendingResult<LocationSettingsResult> result =
+//                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient,
+//                        builder.build());
+//        result.setResultCallback(new ResultCallback<LocationSettingsResult>()) {
+//            @Override
+//            public void onResult(LocationSettingsResult result) {
+//                final Status status = result.getStatus();
+//                final LocationSettingsStates= result.getLocationSettingsStates();
+//                switch (status.getStatusCode()) {
+//                    case LocationSettingsStatusCodes.SUCCESS:
+//                        // All location settings are satisfied. The client can
+//                        // initialize location requests here.
+//
+//                        break;
+//                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+//                        // Location settings are not satisfied, but this can be fixed
+//                        // by showing the user a dialog.
+//                        try {
+//                            // Show the dialog by calling startResolutionForResult(),
+//                            // and check the result in onActivityResult().
+//                            status.startResolutionForResult(
+//                                    OuterClass.this,
+//                                    REQUEST_CHECK_SETTINGS);
+//                        } catch (IntentSender.SendIntentException e) {
+//                            // Ignore the error.
+//                        }
+//                        break;
+//                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+//                        // Location settings are not satisfied. However, we have no way
+//                        // to fix the settings so we won't show the dialog.
+//
+//                        break;
+//                }
+//            }
+//        }
     }
+
 }

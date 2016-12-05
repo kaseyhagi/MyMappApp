@@ -55,9 +55,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void onPinLocationButtonClick(View view) {
         Boolean putLocation = false;
-        Intent intent = new Intent(this, MapsActivity.class);
-        intent.putExtra("putLocation", putLocation);
+        Intent intent = new Intent(this, GoogleSearchIntentActivity.class);
         startActivity(intent);
     }
+
 }
 
